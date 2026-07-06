@@ -1,0 +1,56 @@
+.container button {
+  margin-right: 20px;
+  background-color: yellow;
+  border: none;
+  border-radius: 20px;
+  transition: all 0.3s;
+  font-size: 20px;
+  padding: 10px 30px;
+  color: black;
+}
+.container button:hover {
+  background-color: rgb(8, 204, 243);
+  color: white;
+}
+
+.container button:active {
+    opacity: 0.8;
+  
+}
+
+.stop {
+  background-color: red;
+  border: none;
+  border-radius: 20px;
+  transition: all 0.3s;
+  font-size: 20px;
+  padding: 10px 30px;
+}
+
+.stop:hover {
+  background-color: rgb(255, 0, 0);
+  color: white;
+}
+
+.stop:active {
+    transform: scale(0.95);
+  
+}
+
+.option button {
+  margin-right: 20px;
+  background-color: rgb(8, 204, 243);
+  border: none;
+  border-radius: 20px;
+  transition: all 0.3s;
+  font-size: 20px;
+  padding: 10px 30px;
+}
+.option button:hover {
+  background-color: rgb(0, 123, 255);
+  color: white;
+}
+.option button:active {
+    transform: scale(0.95);
+  
+}

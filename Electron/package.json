@@ -1,0 +1,64 @@
+{
+  "name": "typing-student",
+  "version": "1.0.0",
+  "description": "Typing Student Desktop Application",
+  "main": "main.js",
+  "author": "Kuldeep",
+  "license": "ISC",
+  "type": "commonjs",
+
+  "scripts": {
+    "start": "electron .",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder"
+  },
+
+  "devDependencies": {
+    "electron": "^43.0.0",
+    "electron-builder": "^26.15.3"
+  },
+
+  "dependencies": {
+    "dotenv": "^16.4.5"
+  },
+
+  "build": {
+    "appId": "com.kuldeep.typingstudent",
+    "productName": "Typing Student",
+
+    "afterPack": "afterPack.js",
+
+    "directories": {
+      "output": "release"
+    },
+
+    "files": [
+      "main.js",
+      "package.json",
+      "node_modules/**/*"
+    ],
+
+    "extraResources": [
+      {
+        "from": "../student/dist",
+        "to": "student/dist"
+      },
+      {
+        "from": "../backend",
+        "to": "backend",
+        "filter": ["**/*", "!node_modules"]
+      }
+    ],
+
+    "win": {
+      "target": "nsis"
+    },
+
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    }
+  }
+}
