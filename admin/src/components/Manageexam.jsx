@@ -410,13 +410,13 @@ export default function ManageExam() {
   };
   const loadExams = async () => {
     try {
-      const res = await axios.get("https:////axios.get(`${API_BASE_URL}/students`);/api/all-exams");
+      const res = await axios.get("${API_BASE_URL}/api/all-exams");
       setExams(res.data);
     } catch (err) { console.error("Load Exams Error:", err); }
   };
   const loadStudents = async () => {
     try {
-      const res = await axios.get("https:////axios.get(`${API_BASE_URL}/students`);/students");
+      const res = await axios.get("${API_BASE_URL}/students");
       setStudents(res.data);
     } catch (err) { console.error("Load Students Error:", err); }
   };
@@ -442,7 +442,7 @@ export default function ManageExam() {
       alert("Please select at least one student or choose 'Assign to All'"); return;
     }
     try {
-      await axios.post("https:////axios.get(`${API_BASE_URL}/students`);/api/create-exam", {
+      await axios.post("${API_BASE_URL}/api/create-exam", {
         language, paragraph, examDate, startTime, duration,
         assignToAll, studentIds: assignToAll ? [] : selectedStudents,
       });
@@ -455,7 +455,7 @@ export default function ManageExam() {
   const deleteExam = async (id) => {
     if (!window.confirm("Are you sure you want to delete this exam?")) return;
     try {
-      await axios.delete(`https:////axios.get(`${API_BASE_URL}/students`);/api/exam/${id}`);
+      await axios.delete(`${API_BASE_URL}/api/exam/${id}`);
       alert("Exam Deleted"); loadExams();
     } catch (err) { console.error(err); alert("Failed to delete exam"); }
   };

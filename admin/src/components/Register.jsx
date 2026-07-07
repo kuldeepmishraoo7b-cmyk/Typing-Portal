@@ -9,7 +9,7 @@ export default function Register() {
   const [lightboxPhoto, setLightboxPhoto] = useState(null);
 
   const fetchStudents = () => {
-    axios.get("https:////axios.get(`${API_BASE_URL}/students`);/students")
+    axios.get("${API_BASE_URL}/students")
       .then(res => setStudents(res.data))
       .catch(err => console.log(err));
   };
@@ -28,7 +28,7 @@ export default function Register() {
 
   const handleDelete = (id) => {
     if (window.confirm("Delete this student?")) {
-      axios.delete(`https:////axios.get(`${API_BASE_URL}/students`);/delete-student/${id}`)
+      axios.delete(`${API_BASE_URL}/delete-student/${id}`)
         .then(fetchStudents)
         .catch(err => console.log(err));
     }
@@ -39,7 +39,7 @@ export default function Register() {
   };
 
   const handleUpdate = () => {
-    axios.put(`https:////axios.get(`${API_BASE_URL}/students`);/update-student/${editData.id}`, {
+    axios.put(`${API_BASE_URL}/update-student/${editData.id}`, {
       username: editData.username,
       phone: editData.phone
     })
