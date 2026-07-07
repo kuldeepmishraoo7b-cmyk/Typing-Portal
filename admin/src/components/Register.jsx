@@ -9,7 +9,7 @@ export default function Register() {
   const [lightboxPhoto, setLightboxPhoto] = useState(null);
 
   const fetchStudents = () => {
-    axios.get(`${API_BASE_URL}/students`)
+    axios.get("${API_BASE_URL}/students")
       .then(res => setStudents(res.data))
       .catch(err => console.log(err));
   };

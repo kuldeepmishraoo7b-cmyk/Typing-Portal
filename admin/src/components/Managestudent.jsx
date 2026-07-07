@@ -17,7 +17,7 @@ function ManageStudent() {
 
   const fetchPhotos = () => {
     axios
-      .get(`${API_BASE_URL}/students`)
+      .get("${API_BASE_URL}/students")
       .then((res) => {
         const map = {};
         res.data.forEach((s) => {
@@ -30,7 +30,7 @@ function ManageStudent() {
 
   const fetchData = () => {
     axios
-      .get(`${API_BASE_URL}/admin/login_activity`)
+      .get("${API_BASE_URL}/admin/login_activity")
       .then((res) => {
         setStudents(res.data);
         setLastUpdated(new Date());
