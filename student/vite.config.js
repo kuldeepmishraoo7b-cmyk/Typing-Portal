@@ -9,7 +9,7 @@ export default defineConfig({
   server: {
     proxy: {
       "/student-login": {
-        target: "http://127.0.0.1:5000",
+        target: "https:////127.0.0.1:5000",
         changeOrigin: true,
       },
     },

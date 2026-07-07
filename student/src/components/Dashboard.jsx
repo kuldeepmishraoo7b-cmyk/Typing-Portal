@@ -496,7 +496,7 @@ export default function Dashboard() {
     const student = JSON.parse(sessionStorage.getItem("studentData") || localStorage.getItem("studentData"));
     if (!student) return;
     try {
-      const res = await axios.get(`http://https://typing-portal-es53.onrender.com/api/student-messages/${student.id}`);
+      const res = await axios.get(`https://typing-portal-es53.onrender.com/api/student-messages/${student.id}`);
       setMessages(res.data);
     } catch (err) {
       console.error("Failed to fetch messages:", err);
@@ -506,7 +506,7 @@ export default function Dashboard() {
     if (!message.trim()) return;
     const student = JSON.parse(sessionStorage.getItem("studentData") || localStorage.getItem("studentData"));
     try {
-      await axios.post("http://https://typing-portal-es53.onrender.com/api/send-message", {
+      await axios.post("https://typing-portal-es53.onrender.com/api/send-message", {
         student_id: student.id,
         student_name: student.username,
         student_photo: student.photo,
@@ -523,7 +523,7 @@ export default function Dashboard() {
   const handleDeleteMessage = async (id) => {
     if (!window.confirm("Delete this message?")) return;
     try {
-      await axios.delete(`http://https://typing-portal-es53.onrender.com/api/delete-message/${id}`);
+      await axios.delete(`https://typing-portal-es53.onrender.com/api/delete-message/${id}`);
       setMessages(prev => prev.filter(msg => msg.id !== id));
     } catch (err) {
       console.error("Failed to delete message:", err);

@@ -2,7 +2,7 @@ import React, { useEffect, useState, useMemo } from "react";
 import axios from "axios";
 import API_BASE_URL from "../config";
 
-const API = "http://https://typing-portal-es53.onrender.com";
+const API = "https:////https://typing-portal-es53.onrender.com";
 
 const getTotalPossible = (r) => {
   if (r.total_possible_points && r.total_possible_points > 0) return r.total_possible_points;

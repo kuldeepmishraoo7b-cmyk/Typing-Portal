@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 
 const STEPS = { PHONE: 0, OTP: 1, NEW_PASSWORD: 2, SUCCESS: 3 }
 
-const API = 'http://https://typing-portal-es53.onrender.com/api/forgot-password'  // ← change if your backend runs elsewhere
+const API = 'https://typing-portal-es53.onrender.com/api/forgot-password'  // ← change if your backend runs elsewhere
 
 const styles = `
   @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');

@@ -899,7 +899,7 @@ export default function Exam() {
       5000
     );
     try {
-      await axios.post("http://https://typing-portal-es53.onrender.com/save-exam-result", {
+      await axios.post("https://typing-portal-es53.onrender.com/save-exam-result", {
         student_id:   studentId,
         username,
         language:     examData.language,
@@ -942,7 +942,7 @@ export default function Exam() {
     try {
       const paragraphText = exam.paragraph || "";
       const totalWordsInParagraph = paragraphText.trim().split(/\s+/).filter(Boolean).length;
-      await axios.post("http://https://typing-portal-es53.onrender.com/save-exam-result", {
+      await axios.post("https://typing-portal-es53.onrender.com/save-exam-result", {
         student_id:            studentId,
         username,
         language:              exam.language,
@@ -1012,7 +1012,7 @@ export default function Exam() {
     if (!studentId) return;
     const load = async () => {
       try {
-        const res = await axios.get(`http://https://typing-portal-es53.onrender.com/api/exams-for-student/${studentId}`);
+        const res = await axios.get(`https://typing-portal-es53.onrender.com/api/exams-for-student/${studentId}`);
         setExams(prev => {
           return res.data.map(serverExam => {
             const localAttempted = !!localStorage.getItem(`submitted_${serverExam.id}_${studentId}`);

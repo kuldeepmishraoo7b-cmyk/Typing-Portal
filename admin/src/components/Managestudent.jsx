@@ -17,7 +17,7 @@ function ManageStudent() {
 
   const fetchPhotos = () => {
     axios
-      .get("http://axios.get(`${API_BASE_URL}/students`);/students")
+      .get("https:////axios.get(`${API_BASE_URL}/students`);/students")
       .then((res) => {
         const map = {};
         res.data.forEach((s) => {
@@ -30,7 +30,7 @@ function ManageStudent() {
 
   const fetchData = () => {
     axios
-      .get("http://axios.get(`${API_BASE_URL}/students`);/admin/login_activity")
+      .get("https:////axios.get(`${API_BASE_URL}/students`);/admin/login_activity")
       .then((res) => {
         setStudents(res.data);
         setLastUpdated(new Date());
@@ -52,7 +52,7 @@ function ManageStudent() {
     e.stopPropagation();
     if (window.confirm("Delete this record?")) {
       axios
-        .delete(`http://axios.get(`${API_BASE_URL}/students`);/delete-activity/${id}`)
+        .delete(`https:////axios.get(`${API_BASE_URL}/students`);/delete-activity/${id}`)
         .then(() => fetchData())
         .catch((err) => console.log(err));
     }
@@ -67,7 +67,7 @@ function ManageStudent() {
     setClearing(true);
     try {
       await Promise.all(
-        students.map((s) => axios.delete(`http://axios.get(`${API_BASE_URL}/students`);/delete-activity/${s.id}`))
+        students.map((s) => axios.delete(`https:////axios.get(`${API_BASE_URL}/students`);/delete-activity/${s.id}`))
       );
       setStudents([]);
       alert("✅ All records cleared.");
