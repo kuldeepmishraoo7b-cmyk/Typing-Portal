@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import "../App.css";
 import logo from "../assets/logo2.png";
-import bg from "../assets/mcu1.JPG";
+import bg from "../assets/mcu1.jpg";
 import API_BASE_URL from "../config";
 
 const LOGO_SRC = logo;
