@@ -3,6 +3,7 @@ import { Container, Row, Col, Form, Button, Card, Spinner } from "react-bootstra
 import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import axios from "axios";
+import API_BASE_URL from "../config";
 import logo from "../assets/logo2.png";
 
 const LOGO_SRC = logo;
