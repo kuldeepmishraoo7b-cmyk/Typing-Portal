@@ -8,7 +8,7 @@ import "dotenv/config";
 
 
 import express, { json } from "express";
-import { createConnection } from "mysql2";
+import mysql from "mysql2";
 import cors from "cors";
 import bcrypt from "bcryptjs";
 const { compare, hash } = bcrypt;
@@ -23,18 +23,21 @@ const app = express();
 app.use(cors());
 app.use(json({ limit: "10mb" }));
 
-const db = createConnection({
-  host:     process.env.DB_HOST     || "localhost",
-  user:     process.env.DB_USER     || "root",
+const db = mysql.createPool({
+  host: process.env.DB_HOST || "localhost",
+  user: process.env.DB_USER || "root",
   password: process.env.DB_PASSWORD || "",
-  database: process.env.DB_NAME     || "typing website",
-  port:     process.env.DB_PORT     || 3306,
-  ssl: { rejectUnauthorized: false }
+  database: process.env.DB_NAME || "typing website",
+  port: process.env.DB_PORT || 3306,
+  ssl: { rejectUnauthorized: false },
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
 });
 
-db.connect(err => {
+db.query("SELECT 1", (err) => {
   if (err) console.log("Database Error:", err);
-  else     console.log("MySQL Connected");
+  else console.log("MySQL Pool Connected");
 });
 
 app.use("/api/forgot-password",       forgotPasswordRoutes(db));
