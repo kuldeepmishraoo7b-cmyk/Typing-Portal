@@ -2,8 +2,9 @@ import React, { useState, useEffect } from "react";
 import { Card, Button, Badge, Form } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import API_BASE_URL from "../config";
 
-const BASE_URL = "https:////axios.get(`${API_BASE_URL}/students`);";
+const BASE_URL = API_BASE_URL;
 
 export default function Dashboard() {
 

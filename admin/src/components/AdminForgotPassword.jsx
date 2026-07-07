@@ -1,7 +1,8 @@
 
 import { useState, useEffect, useRef } from "react";
+import API_BASE_URL from "../config";
 
-const API = "https:////axios.get(`${API_BASE_URL}/students`);";
+const API = API_BASE_URL;
 
 const STEP_USERNAME = 1;
 const STEP_OTP      = 2;

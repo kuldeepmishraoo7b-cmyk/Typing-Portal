@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
+import API_BASE_URL from "../config";
 
 function ManageStudent() {
   const [students, setStudents] = useState([]);
@@ -17,7 +18,7 @@ function ManageStudent() {
 
   const fetchPhotos = () => {
     axios
-      .get("${API_BASE_URL}/students")
+      .get(`${API_BASE_URL}/students`)
       .then((res) => {
         const map = {};
         res.data.forEach((s) => {
@@ -30,7 +31,7 @@ function ManageStudent() {
 
   const fetchData = () => {
     axios
-      .get("${API_BASE_URL}/admin/login_activity")
+      .get(`${API_BASE_URL}/admin/login_activity`)
       .then((res) => {
         setStudents(res.data);
         setLastUpdated(new Date());

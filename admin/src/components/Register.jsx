@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import API_BASE_URL from "../config";
 
 export default function Register() {
   const [students, setStudents] = useState([]);
@@ -9,7 +10,7 @@ export default function Register() {
   const [lightboxPhoto, setLightboxPhoto] = useState(null);
 
   const fetchStudents = () => {
-    axios.get("${API_BASE_URL}/students")
+    axios.get(`${API_BASE_URL}/students`)
       .then(res => setStudents(res.data))
       .catch(err => console.log(err));
   };
