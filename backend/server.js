@@ -89,8 +89,13 @@ app.post("/admin-login", async (req, res) => {
   const { username, password } = req.body;
 
   db.query("SELECT * FROM boss WHERE username=?", [username], async (err, result) => {
-    if (err) return res.json({ success: false, message: "Database error" });
-
+    if (err) {
+  console.error("Boss login error:", err);
+  return res.json({
+    success: false,
+    message: err.message,
+  });
+}
     if (result.length > 0) {
       const admin = result[0];
       const match = await compare(password, admin.password);
@@ -99,7 +104,13 @@ app.post("/admin-login", async (req, res) => {
     }
 
     db.query("SELECT * FROM admins WHERE username=?", [username], async (err2, result2) => {
-      if (err2) return res.json({ success: false, message: "Database error" });
+      if (err2) {
+        console.error("Admin login error:", err2);
+        return res.json({
+          success: false,
+          message: err2.message,
+        });
+      }
       if (result2.length === 0) return res.json({ success: false, message: "User not found" });
 
       const admin = result2[0];
