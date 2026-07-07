@@ -422,7 +422,7 @@ function Login() {
 
     try {
       setLoading(true);
-      const res = await axios.post(`${API_BASE_URL}/admin-login`, {
+     const res = await axios.post(`${API_BASE_URL}/admin-login`, {
   username,
   password,
 });
