@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-const API = "http://localhost:5000";
+const API = "http://https://typing-portal-es53.onrender.com";
 // ── Scoring helpers (match AdminExamResults) ───────────────────────────────
 const getTotalPossible = (r) => {
   if (r.total_possible_points && r.total_possible_points > 0) return r.total_possible_points;

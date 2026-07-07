@@ -721,7 +721,7 @@ export default function Practice() {
       const lid = loginIdRef.current;
       if (!lid) return;
       try {
-        await axios.post("http://localhost:5000/api/live-practice", {
+        await axios.post("http://https://typing-portal-es53.onrender.com/api/live-practice", {
           login_id:      lid,
           language:      languageRef.current,
           score:         scoreRef.current,
@@ -760,7 +760,7 @@ export default function Practice() {
   }, []);
   const loadWord = useCallback(async (lang, lvl) => {
     try {
-      const res = await axios.get(`http://localhost:5000/practice-text?language=${lang}&level=${lvl}`);
+      const res = await axios.get(`http://https://typing-portal-es53.onrender.com/practice-text?language=${lang}&level=${lvl}`);
       if (res.data.length > 0) setWord(res.data[0].content);
       setTyped("");
     } catch (e) { console.log(e); }
@@ -770,7 +770,7 @@ export default function Practice() {
       const raw = localStorage.getItem("studentData");
       if (!raw) return null;
       const student = JSON.parse(raw);
-      const res = await axios.post("http://localhost:5000/student-login-activity", {
+      const res = await axios.post("http://https://typing-portal-es53.onrender.com/student-login-activity", {
         student_id: student.id,
         username:   student.username,
         language:   lang || languageRef.current,
@@ -835,7 +835,7 @@ export default function Practice() {
     enterFullscreen();
     await createLoginActivity(language);
     try {
-      const res = await axios.get(`http://localhost:5000/practice-text?language=${language}&level=1`);
+      const res = await axios.get(`http://https://typing-portal-es53.onrender.com/practice-text?language=${language}&level=1`);
       if (res.data.length > 0) setWord(res.data[0].content);
     } catch (e) { console.log(e); }
     setTimeout(() => inputRef.current?.focus(), 200);
@@ -986,7 +986,7 @@ export default function Practice() {
     try {
       const lid = loginIdRef.current;
       if (!lid) return;
-      await axios.post("http://localhost:5000/save-practice", {
+      await axios.post("http://https://typing-portal-es53.onrender.com/save-practice", {
         login_id: lid, language, score, level_reached: level,
         wpm: calcWPM(correctChars, time), accuracy: calcAcc(correctChars, totalChars),
       });

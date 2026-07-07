@@ -3,7 +3,7 @@ import { Card, Button, Badge, Form } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-const BASE_URL = "http://localhost:5000";
+const BASE_URL = "http://axios.get(`${API_BASE_URL}/students`);";
 
 export default function Dashboard() {
 

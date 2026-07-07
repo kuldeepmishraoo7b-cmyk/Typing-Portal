@@ -1,7 +1,7 @@
 
 import { useState, useEffect, useRef } from "react";
 
-const API = "http://localhost:5000";
+const API = "http://axios.get(`${API_BASE_URL}/students`);";
 
 const STEP_USERNAME = 1;
 const STEP_OTP      = 2;

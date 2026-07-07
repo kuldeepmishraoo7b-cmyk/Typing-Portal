@@ -813,7 +813,7 @@ export default function Register() {
 
     phoneCheckTimer.current = setTimeout(async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/check-phone/${form.phone}`);
+        const res = await axios.get(`http://https://typing-portal-es53.onrender.com/check-phone/${form.phone}`);
         // Backend must return { exists: true } or { exists: false }
         setPhoneCheckStatus(res.data.exists ? "taken" : "available");
       } catch (err) {
@@ -927,7 +927,7 @@ export default function Register() {
     setError("");
 
     try {
-      await axios.post("http://localhost:5000/register-student", {
+      await axios.post("http://https://typing-portal-es53.onrender.com/register-student", {
         ...form,
         photo: image,
         descriptor: descriptor

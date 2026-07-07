@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-const BASE = "http://localhost:5000";
+const BASE = "http://axios.get(`${API_BASE_URL}/students`);";
 function AddAdmin() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");

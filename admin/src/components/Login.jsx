@@ -422,7 +422,7 @@ function Login() {
 
     try {
       setLoading(true);
-      const res = await axios.post("http://localhost:5000/admin-login", {
+      const res = await axios.post("http:///admin-login", {
         username: username,
         password: password,
       });
