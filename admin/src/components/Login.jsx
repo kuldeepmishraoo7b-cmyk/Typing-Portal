@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import axios from "axios";
 import logo from "../assets/logo2.png";
-
+import API_BASE_URL from "../config";
 const LOGO_SRC = logo;
 const styles = `
   @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Exo+2:wght@300;400;500;600&display=swap');
@@ -422,10 +422,13 @@ function Login() {
 
     try {
       setLoading(true);
-      const res = await axios.post("https://///admin-login", {
-        username: username,
-        password: password,
-      });
+     const res = await axios.post(
+  `${API_BASE_URL}/admin-login`,
+  {
+    username,
+    password,
+  }
+);
 
       if (res.data.success) {
         sessionStorage.setItem("adminLogin", "true");
