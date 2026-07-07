@@ -35,7 +35,7 @@ export default function ProtectedRoute({ children }) {
     // Verify the student still exists in DB (catches server restart scenario)
     const student = JSON.parse(studentData);
     axios
-      .get(`http://https://typing-portal-es53.onrender.com/verify-session/${student.id}`)
+      .get(`https://typing-portal-es53.onrender.com/verify-session/${student.id}`)
       .then((res) => {
         if (res.data.valid) {
           setStatus("ok");
