@@ -88,6 +88,14 @@ const TOTAL_WORDS_COALESCE = `
 `;
 
 
+// Render servers run in UTC. Admin enters exam date/time in India time.
+// Use a fixed IST current time for exam start/expiry checks so the student
+// Start button becomes active at the correct India date and time.
+const APP_NOW_SQL = "DATE_ADD(UTC_TIMESTAMP(), INTERVAL 330 MINUTE)";
+const EXAM_START_SQL = "TIMESTAMP(e.exam_date, e.start_time)";
+const EXAM_START_SQL_NO_ALIAS = "TIMESTAMP(exam_date, start_time)";
+
+
 app.post("/admin-login", async (req, res) => {
   const { username, password } = req.body;
 
@@ -388,10 +396,11 @@ app.get("/get-exams", (req, res) => {
   const query = `
     SELECT *,
       DATE_FORMAT(exam_date, '%Y-%m-%d') AS exam_date,
-      CONCAT(exam_date, ' ', start_time) AS start_datetime
+      ${EXAM_START_SQL_NO_ALIAS} AS start_datetime,
+      ${APP_NOW_SQL} AS server_ist_time
     FROM exams
-    WHERE CONCAT(exam_date, ' ', start_time) <= NOW()
-      AND DATE_ADD(CONCAT(exam_date, ' ', start_time), INTERVAL duration MINUTE) >= NOW()
+    WHERE ${EXAM_START_SQL_NO_ALIAS} <= ${APP_NOW_SQL}
+      AND DATE_ADD(${EXAM_START_SQL_NO_ALIAS}, INTERVAL duration MINUTE) >= ${APP_NOW_SQL}
     ORDER BY exam_date, start_time
   `;
   db.query(query, (err, results) => {
@@ -404,15 +413,21 @@ app.get("/get-exam/:id", (req, res) => {
   const query = `
     SELECT *,
       DATE_FORMAT(exam_date, '%Y-%m-%d') AS exam_date,
-      CONCAT(exam_date, ' ', start_time) AS start_datetime
+      ${EXAM_START_SQL_NO_ALIAS} AS start_datetime,
+      DATE_ADD(${EXAM_START_SQL_NO_ALIAS}, INTERVAL duration MINUTE) AS end_datetime,
+      ${APP_NOW_SQL} AS server_ist_time
     FROM exams
     WHERE id=?
-      AND CONCAT(exam_date, ' ', start_time) <= NOW()
-      AND DATE_ADD(CONCAT(exam_date, ' ', start_time), INTERVAL duration MINUTE) >= NOW()
+      AND ${EXAM_START_SQL_NO_ALIAS} <= ${APP_NOW_SQL}
+      AND DATE_ADD(${EXAM_START_SQL_NO_ALIAS}, INTERVAL duration MINUTE) >= ${APP_NOW_SQL}
   `;
   db.query(query, [req.params.id], (err, results) => {
-    if (err)             return res.status(500).json({ error: err.message });
-    if (!results.length) return res.status(403).json({ error: "Exam not active!" });
+    if (err) return res.status(500).json({ error: err.message });
+    if (!results.length) {
+      return res.status(403).json({
+        error: "Exam not active! Please check the exam date, start time and duration."
+      });
+    }
     res.json(results[0]);
   });
 });
@@ -467,7 +482,7 @@ app.get("/api/all-exams", (req, res) => {
     SELECT
       e.*,
       DATE_FORMAT(e.exam_date, '%Y-%m-%d') AS exam_date,
-      CONCAT(e.exam_date, ' ', e.start_time) AS start_datetime,
+      TIMESTAMP(e.exam_date, e.start_time) AS start_datetime,
       GROUP_CONCAT(s.username ORDER BY s.username SEPARATOR ', ') AS assigned_students
     FROM exams e
     LEFT JOIN exam_assignments ea ON e.id = ea.exam_id
@@ -478,7 +493,7 @@ app.get("/api/all-exams", (req, res) => {
   db.query(sql, (err, result) => {
     if (err) {
       db.query(
-        "SELECT *, CONCAT(exam_date, ' ', start_time) AS start_datetime FROM exams ORDER BY exam_date DESC, start_time DESC",
+        "SELECT *, TIMESTAMP(exam_date, start_time) AS start_datetime FROM exams ORDER BY exam_date DESC, start_time DESC",
         (fbErr, fbResult) => {
           if (fbErr) return res.status(500).json([]);
           res.json(fbResult);
@@ -512,12 +527,14 @@ app.get("/api/exams-for-student/:studentId", (req, res) => {
     SELECT
       e.*,
       DATE_FORMAT(e.exam_date, '%Y-%m-%d') AS exam_date,
-      CONCAT(e.exam_date, ' ', e.start_time) AS start_datetime,
+      ${EXAM_START_SQL} AS start_datetime,
+      DATE_ADD(${EXAM_START_SQL}, INTERVAL e.duration MINUTE) AS end_datetime,
+      ${APP_NOW_SQL} AS server_ist_time,
       (SELECT COUNT(*) FROM exam_results er
        WHERE er.student_id=? AND er.exam_id=e.id) AS attempted,
       CASE
-        WHEN NOW() < CONCAT(e.exam_date, ' ', e.start_time) THEN 'Not Started'
-        WHEN NOW() > DATE_ADD(CONCAT(e.exam_date, ' ', e.start_time), INTERVAL e.duration MINUTE) THEN 'Expired'
+        WHEN ${APP_NOW_SQL} < ${EXAM_START_SQL} THEN 'Not Started'
+        WHEN ${APP_NOW_SQL} > DATE_ADD(${EXAM_START_SQL}, INTERVAL e.duration MINUTE) THEN 'Expired'
         ELSE 'Ongoing'
       END AS status
     FROM exams e
@@ -533,21 +550,27 @@ app.get("/api/exams-for-student/:studentId", (req, res) => {
 
   db.query(sql, [studentId, studentId], (err, result) => {
     if (err) {
+      console.error("/api/exams-for-student error:", err);
       const fallbackSql = `
         SELECT e.*,
           DATE_FORMAT(e.exam_date, '%Y-%m-%d') AS exam_date,
-          CONCAT(e.exam_date, ' ', e.start_time) AS start_datetime,
+          ${EXAM_START_SQL} AS start_datetime,
+          DATE_ADD(${EXAM_START_SQL}, INTERVAL e.duration MINUTE) AS end_datetime,
+          ${APP_NOW_SQL} AS server_ist_time,
           (SELECT COUNT(*) FROM exam_results er WHERE er.student_id=? AND er.exam_id=e.id) AS attempted,
           CASE
-            WHEN NOW() < CONCAT(e.exam_date, ' ', e.start_time) THEN 'Not Started'
-            WHEN NOW() > DATE_ADD(CONCAT(e.exam_date, ' ', e.start_time), INTERVAL e.duration MINUTE) THEN 'Expired'
+            WHEN ${APP_NOW_SQL} < ${EXAM_START_SQL} THEN 'Not Started'
+            WHEN ${APP_NOW_SQL} > DATE_ADD(${EXAM_START_SQL}, INTERVAL e.duration MINUTE) THEN 'Expired'
             ELSE 'Ongoing'
           END AS status
         FROM exams e
         ORDER BY e.exam_date ASC, e.start_time ASC
       `;
       db.query(fallbackSql, [studentId], (fbErr, fbResult) => {
-        if (fbErr) return res.status(500).json([]);
+        if (fbErr) {
+          console.error("/api/exams-for-student fallback error:", fbErr);
+          return res.status(500).json([]);
+        }
         res.json(fbResult.filter(e => e.status !== "Expired"));
       });
       return;
@@ -555,7 +578,6 @@ app.get("/api/exams-for-student/:studentId", (req, res) => {
     res.json(result.filter(e => e.status !== "Expired"));
   });
 });
-
 
 app.post("/save-exam-result", (req, res) => {
   const {
@@ -917,6 +939,15 @@ app.get("/verify-session/:id", (req, res) => {
 
 
 
+
+
+// Debug helper: check the backend time used for exam activation.
+app.get("/api/server-time", (req, res) => {
+  db.query(`SELECT UTC_TIMESTAMP() AS utc_time, ${APP_NOW_SQL} AS india_time`, (err, rows) => {
+    if (err) return res.status(500).json({ message: err.message });
+    res.json(rows[0]);
+  });
+});
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));

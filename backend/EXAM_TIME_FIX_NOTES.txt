@@ -1,0 +1,23 @@
+Repaired by ChatGPT
+
+Fix included:
+1. Exam start/expiry checks now use India time (UTC +05:30) instead of Render server time.
+2. /get-exams and /get-exam/:id now use TIMESTAMP(exam_date, start_time) and server_ist_time.
+3. /api/exams-for-student/:studentId now returns correct status: Not Started / Ongoing / Expired using India time.
+4. Added /api/server-time endpoint so you can verify backend UTC time and India time.
+5. Forgot password files remain configured to use Brevo API through utils/sendEmail.js.
+
+After replacing backend files:
+npm install
+git add .
+git commit -m "Fix exam start time with India timezone"
+git push
+
+Required Render variables:
+DB_HOST
+DB_NAME
+DB_USER
+DB_PASSWORD
+DB_PORT
+EMAIL_USER
+BREVO_API_KEY
