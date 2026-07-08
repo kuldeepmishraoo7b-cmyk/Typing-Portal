@@ -76,11 +76,11 @@ export default function (db) {
           });
           return res.json({ success: true, maskedEmail: maskEmail(email) });
         } catch (mailErr) {
-          console.error("Email send error:", mailErr);
-          return res.status(500).json({
-            message: "Failed to send OTP email. Check EMAIL_USER / EMAIL_PASS in .env",
-          });
-        }
+  console.error("Email send error:", mailErr);
+  return res.status(500).json({
+    message: mailErr.message || "Failed to send OTP email",
+  });
+}
       }
     );
   });
