@@ -1,24 +1,10 @@
 // routes/forgotPassword.js
-import express    from "express";
-import nodemailer from "nodemailer";
-import bcrypt     from "bcryptjs";
+import express from "express";
+import bcrypt from "bcryptjs";
+import { sendOtpEmail } from "../utils/sendEmail.js";
 
-// In-memory OTP store: { phone: { otp, email, expiresAt } }
+// In-memory OTP store: { phone: { otp, email, expiresAt, verified } }
 const otpStore = {};
-
-function createTransporter() {
-  console.log("Using Brevo SMTP:", process.env.SMTP_USER);
-
-  return nodemailer.createTransport({
-    host: "smtp-relay.brevo.com",
-    port: 587,
-    secure: false,
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
-    },
-  });
-}
 
 function maskEmail(email) {
   const [local, domain] = email.split("@");
@@ -29,12 +15,20 @@ function generateOTP() {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
+function storeOtp(phone, email) {
+  const otp = generateOTP();
+  const expiresAt = Date.now() + 5 * 60 * 1000;
+  otpStore[phone] = { otp, email, expiresAt, verified: false };
+  return otp;
+}
+
 export default function (db) {
   const router = express.Router();
 
   // POST /api/forgot-password/send-otp
   router.post("/send-otp", async (req, res) => {
     const { phone } = req.body;
+
     if (!phone || !/^\d{10}$/.test(phone)) {
       return res.status(400).json({ message: "Enter a valid 10-digit phone number" });
     }
@@ -47,44 +41,35 @@ export default function (db) {
           console.error("DB error on send-otp:", err);
           return res.status(500).json({ message: "Database error" });
         }
+
         if (!rows.length) {
           return res.status(404).json({ message: "No account found with this phone number" });
         }
+
         const email = rows[0].email;
         if (!email) {
           return res.status(400).json({ message: "No email linked to this account" });
         }
 
-        const otp       = generateOTP();
-        const expiresAt = Date.now() + 5 * 60 * 1000;
-        otpStore[phone] = { otp, email, expiresAt };
-        console.log(`OTP for ${phone}: ${otp}`);
+        const otp = storeOtp(phone, email);
+        console.log(`Student OTP for ${phone}: ${otp}`);
 
         try {
-          const transporter = createTransporter();
-          await transporter.sendMail({
-            from:    `"Typing Website" <${process.env.EMAIL_USER}>`,
-            to:      email,
-            subject: "Your OTP for Password Reset",
-            html: `
-              <div style="font-family:sans-serif;max-width:480px;margin:auto;padding:32px;background:#f9f9f9;border-radius:12px;">
-                <h2 style="color:#ff6b3d;">Password Reset OTP</h2>
-                <p>Use the OTP below to reset your password. It expires in <strong>5 minutes</strong>.</p>
-                <div style="font-size:36px;font-weight:bold;letter-spacing:12px;text-align:center;
-                            padding:24px;background:#fff;border-radius:8px;margin:24px 0;color:#333;">
-                  ${otp}
-                </div>
-                <p style="color:#888;font-size:13px;">If you didn't request this, ignore this email.</p>
-              </div>
-            `,
+          await sendOtpEmail(email, "Your OTP for Password Reset", otp, {
+            senderName: "Typing Website",
+            heading: "Password Reset OTP",
+            message: "Use this OTP to reset your password.",
+            validity: "5 minutes",
           });
+
           return res.json({ success: true, maskedEmail: maskEmail(email) });
         } catch (mailErr) {
-  console.error("Email send error:", mailErr);
-  return res.status(500).json({
-    message: mailErr.message || "Failed to send OTP email",
-  });
-}
+          console.error("Student OTP email error:", mailErr.message || mailErr);
+          delete otpStore[phone];
+          return res.status(500).json({
+            message: mailErr.message || "Failed to send OTP email",
+          });
+        }
       }
     );
   });
@@ -92,20 +77,25 @@ export default function (db) {
   // POST /api/forgot-password/verify-otp
   router.post("/verify-otp", (req, res) => {
     const { phone, otp } = req.body;
+
     if (!phone || !otp) {
       return res.status(400).json({ message: "Phone and OTP are required" });
     }
+
     const record = otpStore[phone];
     if (!record) {
       return res.status(400).json({ message: "No OTP found for this phone. Request a new one." });
     }
+
     if (Date.now() > record.expiresAt) {
       delete otpStore[phone];
       return res.status(400).json({ message: "OTP has expired. Please request a new one." });
     }
+
     if (record.otp !== otp.trim()) {
       return res.status(400).json({ message: "Incorrect OTP. Please try again." });
     }
+
     otpStore[phone].verified = true;
     return res.json({ success: true });
   });
@@ -113,25 +103,32 @@ export default function (db) {
   // POST /api/forgot-password/reset
   router.post("/reset", async (req, res) => {
     const { phone, otp, newPassword } = req.body;
+
     if (!phone || !otp || !newPassword) {
       return res.status(400).json({ message: "All fields are required" });
     }
+
     if (newPassword.length < 8) {
       return res.status(400).json({ message: "Password must be at least 8 characters" });
     }
+
     const record = otpStore[phone];
     if (!record || !record.verified) {
       return res.status(400).json({ message: "OTP not verified. Please verify first." });
     }
+
     if (Date.now() > record.expiresAt) {
       delete otpStore[phone];
       return res.status(400).json({ message: "OTP expired. Start over." });
     }
+
     if (record.otp !== otp.trim()) {
       return res.status(400).json({ message: "Invalid OTP." });
     }
+
     try {
       const hashedPassword = await bcrypt.hash(newPassword, 10);
+
       db.query(
         "UPDATE students SET password = ? WHERE phone = ?",
         [hashedPassword, phone],
@@ -140,9 +137,11 @@ export default function (db) {
             console.error("DB error on reset:", err);
             return res.status(500).json({ message: "Database error while resetting password" });
           }
+
           if (result.affectedRows === 0) {
             return res.status(404).json({ message: "Student not found" });
           }
+
           delete otpStore[phone];
           return res.json({ success: true, message: "Password reset successfully" });
         }
@@ -156,39 +155,31 @@ export default function (db) {
   // POST /api/forgot-password/resend-otp
   router.post("/resend-otp", async (req, res) => {
     const { phone } = req.body;
-    if (!phone) return res.status(400).json({ message: "Phone required" });
+
+    if (!phone) {
+      return res.status(400).json({ message: "Phone required" });
+    }
 
     const record = otpStore[phone];
     if (!record) {
       return res.status(400).json({ message: "Session expired. Please start again." });
     }
 
-    const otp       = generateOTP();
-    const expiresAt = Date.now() + 5 * 60 * 1000;
-    otpStore[phone] = { otp, email: record.email, expiresAt };
-    console.log(`Resend OTP for ${phone}: ${otp}`);
+    const otp = storeOtp(phone, record.email);
+    console.log(`Student resend OTP for ${phone}: ${otp}`);
 
     try {
-      const transporter = createTransporter();
-      await transporter.sendMail({
-        from:    `"Typing Website" <${process.env.EMAIL_USER}>`,
-        to:      record.email,
-        subject: "Your New OTP for Password Reset",
-        html: `
-          <div style="font-family:sans-serif;max-width:480px;margin:auto;padding:32px;background:#f9f9f9;border-radius:12px;">
-            <h2 style="color:#ff6b3d;">New OTP Requested</h2>
-            <p>Your new OTP is below. It expires in <strong>5 minutes</strong>.</p>
-            <div style="font-size:36px;font-weight:bold;letter-spacing:12px;text-align:center;
-                        padding:24px;background:#fff;border-radius:8px;margin:24px 0;color:#333;">
-              ${otp}
-            </div>
-          </div>
-        `,
+      await sendOtpEmail(record.email, "Your New OTP for Password Reset", otp, {
+        senderName: "Typing Website",
+        heading: "New OTP Requested",
+        message: "Use this new OTP to reset your password.",
+        validity: "5 minutes",
       });
-      return res.json({ success: true });
+
+      return res.json({ success: true, maskedEmail: maskEmail(record.email) });
     } catch (mailErr) {
-      console.error("Resend email error:", mailErr);
-      return res.status(500).json({ message: "Failed to resend OTP email" });
+      console.error("Student resend OTP email error:", mailErr.message || mailErr);
+      return res.status(500).json({ message: mailErr.message || "Failed to resend OTP email" });
     }
   });
 
