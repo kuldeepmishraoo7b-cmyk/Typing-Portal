@@ -613,7 +613,7 @@ export default function AdminForgotPassword() {
               </p>
               <button
                 className="afp-btn-outline"
-                onClick={() => window.location.href = "/admin/login"}
+                onClick={() => window.location.href = "/#/admin/login"}
               >
                 Go to Admin Login
               </button>
@@ -681,7 +681,7 @@ export default function AdminForgotPassword() {
 
                   <div className="afp-back">
                     <span>Remember your password?</span>
-                    <a href="/admin/login">Back to Login</a>
+                    <a href="/#/admin/login">Back to Login</a>
                   </div>
                 </>
               )}
