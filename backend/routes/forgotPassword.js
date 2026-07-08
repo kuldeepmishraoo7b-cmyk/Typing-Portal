@@ -7,6 +7,8 @@ import bcrypt     from "bcryptjs";
 const otpStore = {};
 
 function createTransporter() {
+  console.log("Using Brevo SMTP:", process.env.SMTP_USER);
+
   return nodemailer.createTransport({
     host: "smtp-relay.brevo.com",
     port: 587,
