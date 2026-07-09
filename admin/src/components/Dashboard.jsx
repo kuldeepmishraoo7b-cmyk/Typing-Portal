@@ -51,13 +51,13 @@ export default function Dashboard() {
   }, [navigate]);
 
   
-  const allSections = [
-    { title: "Manage Exams", description: "Create and manage exams", link: "/Manageexam", allowedFor: ["boss", "admin"] },
-    { title: "Manage Students", description: "View and edit student data", link: "/Managestudent", allowedFor: ["boss"] },
-    { title: "Add Admin", description: "Add new administrators", link: "/addadmin", allowedFor: ["boss"] },
-    { title: "Results", description: "Check exam results", link: "/results", allowedFor: ["boss"] },
-    { title: "Register Students", description: "Check Register Students", link: "/Register", allowedFor: ["boss"] },
-  ];
+ const allSections = [
+  { title: "Manage Exams", description: "Create and manage exams", link: "/manageexam", allowedFor: ["boss", "admin"] },
+  { title: "Manage Students", description: "View and edit student data", link: "/managestudent", allowedFor: ["boss"] },
+  { title: "Add Admin", description: "Add new administrators", link: "/addadmin", allowedFor: ["boss"] },
+  { title: "Results", description: "Check exam results", link: "/results", allowedFor: ["boss"] },
+  { title: "Register Students", description: "Check Register Students", link: "/register", allowedFor: ["boss"] },
+];
 
   
   const dashboardSections = allSections.filter(s => s.allowedFor.includes(adminRole));
@@ -192,7 +192,7 @@ export default function Dashboard() {
                   {section.description}
                 </Card.Text>
                 <Button
-                  href={section.link}
+                  onClick={() => navigate(section.link)}
                   variant="primary"
                   style={{
                     borderRadius: "30px",

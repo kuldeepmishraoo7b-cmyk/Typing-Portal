@@ -6,6 +6,8 @@ function Sidebar() {
   const location = useLocation();
   const navigate = useNavigate();
 
+  const adminRole = sessionStorage.getItem("adminRole");
+
   const handleLogout = () => {
     sessionStorage.removeItem("adminLogin");
     sessionStorage.removeItem("adminRole");
@@ -14,12 +16,12 @@ function Sidebar() {
   };
 
   const navLinks = [
-    { path: "/dashboard", icon: <FaHome />, label: "Dashboard" },
-    { path: "/Manageexam", icon: <FaBook />, label: "Manage Exams" },
-    { path: "/Managestudent", icon: <FaUser />, label: "Manage Students" },
-    { path: "/addadmin", icon: <FaCog />, label: "Add Admin" },
-    { path: "/results", icon: <FaChartBar />, label: "Results" },
-    { path: "/register", icon: <FaCog />, label: "Registered Student" },
+    { path: "/dashboard", icon: <FaHome />, label: "Dashboard", allowedFor: ["boss", "admin"] },
+    { path: "/manageexam", icon: <FaBook />, label: "Manage Exams", allowedFor: ["boss", "admin"] },
+    { path: "/managestudent", icon: <FaUser />, label: "Manage Students", allowedFor: ["boss"] },
+    { path: "/addadmin", icon: <FaCog />, label: "Add Admin", allowedFor: ["boss"] },
+    { path: "/results", icon: <FaChartBar />, label: "Results", allowedFor: ["boss"] },
+    { path: "/register", icon: <FaCog />, label: "Registered Student", allowedFor: ["boss"] },
   ];
 
   return (
@@ -46,7 +48,7 @@ function Sidebar() {
       </h3>
 
       <Nav className="flex-column">
-        {navLinks.map((link, index) => (
+        {navLinks.filter(link => link.allowedFor.includes(adminRole)).map((link, index) => (
           <Nav.Link
             as={Link}
             to={link.path}
