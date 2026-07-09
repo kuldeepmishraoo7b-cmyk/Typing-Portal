@@ -51,6 +51,25 @@ const INSCRIPT_MAP = {
   ".": "।",  ">": ".",
   "/": "य",  "?": "?"
 };
+
+// Fix Hindi text if backend/database returns UTF-8 as broken latin text like "à¤¤"
+function fixHindiEncoding(text) {
+  if (!text || typeof text !== "string") return text || "";
+  if (!/[àÂÃ]/.test(text)) return text;
+  try {
+    const bytes = Array.from(text, ch => ch.charCodeAt(0));
+    const binary = bytes.map(b => String.fromCharCode(b)).join("");
+    return decodeURIComponent(escape(binary));
+  } catch (e) {
+    return text;
+  }
+}
+
+function normalizePracticeText(text, lang) {
+  const fixed = lang === "HI" ? fixHindiEncoding(text) : (text || "");
+  return fixed.normalize ? fixed.normalize("NFC") : fixed;
+}
+
 function toHindi(char) {
   return INSCRIPT_MAP[char] ?? char;
 }
@@ -761,7 +780,7 @@ export default function Practice() {
   const loadWord = useCallback(async (lang, lvl) => {
     try {
       const res = await axios.get(`https://typing-portal-es53.onrender.com/practice-text?language=${lang}&level=${lvl}`);
-      if (res.data.length > 0) setWord(res.data[0].content);
+      if (res.data.length > 0) setWord(normalizePracticeText(res.data[0].content, lang));
       setTyped("");
     } catch (e) { console.log(e); }
   }, []);
@@ -836,7 +855,7 @@ export default function Practice() {
     await createLoginActivity(language);
     try {
       const res = await axios.get(`https://typing-portal-es53.onrender.com/practice-text?language=${language}&level=1`);
-      if (res.data.length > 0) setWord(res.data[0].content);
+      if (res.data.length > 0) setWord(normalizePracticeText(res.data[0].content, language));
     } catch (e) { console.log(e); }
     setTimeout(() => inputRef.current?.focus(), 200);
   };
