@@ -30,9 +30,18 @@ const db = mysql.createPool({
   database: process.env.DB_NAME || "typing website",
   port: process.env.DB_PORT || 3306,
   ssl: { rejectUnauthorized: false },
+
+  // IMPORTANT for Hindi/Unicode text
+  // Without this, Hindi can come as mojibake like: à¤š à¤š
+  charset: "utf8mb4",
+
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0
+});
+
+db.query("SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci", (charsetErr) => {
+  if (charsetErr) console.log("Charset Error:", charsetErr);
 });
 
 db.query("SELECT 1", (err) => {
