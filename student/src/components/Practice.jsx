@@ -41,7 +41,7 @@ const INSCRIPT_MAP = {
   ";": "च",  ":": "छ",
   "'": "ट",  "\"": "ठ",
   "z": "ॆ",  "Z": "ऍ",
-  "x": "ँ",  "X": "ः",
+  "x": "ं",  "X": "ँ",
   "c": "म",  "C": "ण",
   "v": "न",  "V": "ऩ",
   "b": "व",  "B": "ऴ",
@@ -128,6 +128,12 @@ for (const [rawKey, hindiChar] of Object.entries(INSCRIPT_MAP)) {
 }
 // Also map space → space (space is universal, not in INSCRIPT_MAP)
 HINDI_CHAR_TO_KEYS[" "] = [{ baseKey: " ", needsShift: false }];
+// Extra Hindi fallback mappings for common signs/characters that may come from database text.
+// This prevents the on-screen keyboard from getting "unable to find key" on words containing anusvara/visarga/nukta.
+HINDI_CHAR_TO_KEYS["ं"] = HINDI_CHAR_TO_KEYS["ं"] || [{ baseKey: "x", needsShift: false }];
+HINDI_CHAR_TO_KEYS["ँ"] = HINDI_CHAR_TO_KEYS["ँ"] || [{ baseKey: "x", needsShift: true }];
+HINDI_CHAR_TO_KEYS["ः"] = HINDI_CHAR_TO_KEYS["ः"] || [{ baseKey: "x", needsShift: true }];
+HINDI_CHAR_TO_KEYS["़"] = HINDI_CHAR_TO_KEYS["़"] || [{ baseKey: "`", needsShift: false }];
 // English shifted symbol → base physical key
 const EN_SHIFT_TO_BASE = {
   "~":"`","!":"1","@":"2","#":"3","$":"4","%":"5","^":"6","&":"7","*":"8","(":"9",")":"0",
@@ -249,7 +255,7 @@ const HI_KEYBOARD_ROWS = [
   [
     { key: "Shift", shift: "Shift", wide: true, label: "⇧", hi: "⇧", hiShift: "⇧" },
     { key: "z", shift: "Z", hi: "ॆ", hiShift: "ऍ" },
-    { key: "x", shift: "X", hi: "ँ", hiShift: "ः" },
+    { key: "x", shift: "X", hi: "ं", hiShift: "ँ" },
     { key: "c", shift: "C", hi: "म", hiShift: "ण" },
     { key: "v", shift: "V", hi: "न", hiShift: "ऩ" },
     { key: "b", shift: "B", hi: "व", hiShift: "ऴ" },
