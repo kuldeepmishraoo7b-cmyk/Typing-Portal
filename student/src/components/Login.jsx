@@ -184,8 +184,8 @@ const styles = `
 
   .login-input {
     width: 100%;
-    background: rgba(30,41,59,0.8);
-    border: 1.5px solid rgba(255,255,255,0.07);
+    background: #000000;
+    border: 1.5px solid rgba(255,255,255,0.22);
     border-radius: 12px;
     padding: 13px 16px;
     color: #f1f5f9;
@@ -195,12 +195,22 @@ const styles = `
     transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
   }
 
-  .login-input::placeholder { color: #475569; }
+  .login-input::placeholder { color: rgba(255,255,255,0.72); }
 
   .login-input:focus {
     border-color: #38bdf8;
-    background: rgba(30,41,59,1);
-    box-shadow: 0 0 0 3px rgba(56,189,248,0.12);
+    background: #000000;
+    box-shadow: 0 0 0 3px rgba(56,189,248,0.18);
+  }
+
+
+  /* Keep browser autofill dark if Chrome still tries to fill saved login */
+  .login-input:-webkit-autofill,
+  .login-input:-webkit-autofill:hover,
+  .login-input:-webkit-autofill:focus {
+    -webkit-text-fill-color: #f1f5f9;
+    transition: background-color 9999s ease-in-out 0s;
+    box-shadow: 0 0 0 1000px #000000 inset;
   }
 
   /* Submit button */
@@ -430,6 +440,8 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [usernameReadOnly, setUsernameReadOnly] = useState(true);
+  const [passwordReadOnly, setPasswordReadOnly] = useState(true);
   const [registeredPhoto, setRegisteredPhoto] = useState("");
   const [showPhotoModal, setShowPhotoModal] = useState(false);
 
@@ -568,15 +580,25 @@ export default function Login() {
             </div>
           )}
 
-          <form onSubmit={handleLogin}>
+          <form onSubmit={handleLogin} autoComplete="off">
+            {/* Hidden dummy fields help stop browser saved-login autofill */}
+            <input type="text" name="fakeusernameremembered" style={{ display: "none" }} autoComplete="off" />
+            <input type="password" name="fakepasswordremembered" style={{ display: "none" }} autoComplete="new-password" />
             <div className="login-field">
               <label className="login-label">Username</label>
               <input
                 className="login-input"
                 type="text"
+                name="student_login_user"
                 placeholder="Enter your username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
+                autoComplete="off"
+                autoCorrect="off"
+                autoCapitalize="none"
+                spellCheck="false"
+                readOnly={usernameReadOnly}
+                onFocus={() => setUsernameReadOnly(false)}
                 required
               />
             </div>
@@ -587,9 +609,13 @@ export default function Login() {
                 <input
                   className="login-input"
                   type={showPassword ? "text" : "password"}
+                  name="student_login_pass_new"
                   placeholder="Enter your password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  autoComplete="new-password"
+                  readOnly={passwordReadOnly}
+                  onFocus={() => setPasswordReadOnly(false)}
                   required
                 />
                 <button
