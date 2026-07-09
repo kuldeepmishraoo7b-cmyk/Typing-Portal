@@ -144,6 +144,53 @@ export default function Home() {
               {k}
             </span>
           ))}
+
+
+          <div
+  style={{
+    background: "linear-gradient(135deg,#1e3c72,#2a5298)",
+    color: "#fff",
+    padding: "50px",
+    borderRadius: "15px",
+    textAlign: "center",
+    marginTop: "60px"
+  }}
+>
+  <h2>Download Typing Portal for Windows</h2>
+
+  <p style={{ maxWidth: "700px", margin: "20px auto", fontSize: "18px" }}>
+    Prefer using a desktop application? Download the official
+    <strong> Typing Portal for Windows</strong> and enjoy a faster,
+    smoother typing experience with all the features of our online portal.
+  </p>
+
+  <ul style={{ listStyle: "none", padding: 0, fontSize: "17px", lineHeight: "2" }}>
+    <li>✅ English & Hindi Typing Practice</li>
+    <li>✅ Online Typing Examinations</li>
+    <li>✅ Real-time WPM & Accuracy</li>
+    <li>✅ Secure Student Login</li>
+    <li>✅ Easy Installation</li>
+  </ul>
+
+  <a
+    href="/Typing/Typing%20Student%20Setup%201.0.0.exe"
+    download
+    className="btn btn-warning btn-lg mt-4"
+    style={{
+      fontWeight: "bold",
+      borderRadius: "30px",
+      padding: "12px 35px"
+    }}
+  >
+    ⬇ Download for Windows
+  </a>
+
+  <p style={{ marginTop: "15px", fontSize: "14px", opacity: "0.9" }}>
+    Compatible with Windows 10 and Windows 11
+  </p>
+</div>
+
+
         </div>
         <div style={styles.heroContent}>
           <div style={styles.heroBadge}>🎓 Student Typing Portal</div>
