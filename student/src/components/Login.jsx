@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import "../App.css";
@@ -307,6 +307,121 @@ const styles = `
     margin-top: 28px;
     animation: fadeUp 0.5s 0.55s both;
   }
+
+  /* Registered photo preview */
+  .registered-photo-box {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 0 18px;
+    padding: 12px;
+    background: rgba(30,41,59,0.55);
+    border: 1px solid rgba(56,189,248,0.15);
+    border-radius: 14px;
+    animation: fadeUp 0.35s both;
+  }
+
+  .registered-photo-thumb {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(56,189,248,0.55);
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .registered-photo-thumb:hover {
+    transform: scale(1.06);
+    box-shadow: 0 0 18px rgba(56,189,248,0.35);
+  }
+
+  .registered-photo-text {
+    color: #cbd5e1;
+    font-size: 0.82rem;
+    line-height: 1.35;
+  }
+
+  .registered-photo-text span {
+    color: #38bdf8;
+    font-weight: 700;
+  }
+
+  .password-wrap {
+    position: relative;
+  }
+
+  .password-wrap .login-input {
+    padding-right: 54px;
+  }
+
+  .password-toggle {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: rgba(15,23,42,0.75);
+    color: #94a3b8;
+    border-radius: 8px;
+    padding: 6px 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: color 0.2s, background 0.2s;
+  }
+
+  .password-toggle:hover {
+    color: #f1f5f9;
+    background: rgba(56,189,248,0.18);
+  }
+
+  .photo-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    background: rgba(2,6,23,0.82);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .photo-modal {
+    width: min(420px, 94vw);
+    background: rgba(10,18,38,0.96);
+    border: 1px solid rgba(56,189,248,0.25);
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.65);
+    text-align: center;
+  }
+
+  .photo-modal img {
+    width: 100%;
+    max-height: 420px;
+    object-fit: contain;
+    border-radius: 16px;
+    background: rgba(15,23,42,0.8);
+  }
+
+  .photo-modal-title {
+    color: #f1f5f9;
+    font-weight: 800;
+    margin-bottom: 14px;
+  }
+
+  .photo-modal-close {
+    width: 100%;
+    margin-top: 14px;
+    padding: 11px;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #38bdf8, #6366f1);
+    color: white;
+    font-weight: 800;
+    cursor: pointer;
+  }
+
 `;
 
 export default function Login() {
@@ -314,8 +429,43 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [registeredPhoto, setRegisteredPhoto] = useState("");
+  const [showPhotoModal, setShowPhotoModal] = useState(false);
 
   const navigate = useNavigate();
+
+  // Shows only the already registered photo. Student cannot upload or change it here.
+  useEffect(() => {
+    const searchValue = username.trim();
+
+    if (searchValue.length < 2) {
+      setRegisteredPhoto("");
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      try {
+        const res = await axios.get(`${API_BASE_URL}/students`);
+        const students = Array.isArray(res.data) ? res.data : [];
+
+        const matchedStudent = students.find((student) => {
+          const savedUsername = String(student.username || "").toLowerCase();
+          const savedPhone = String(student.phone || "").toLowerCase();
+          const typedValue = searchValue.toLowerCase();
+
+          return savedUsername === typedValue || savedPhone === typedValue;
+        });
+
+        setRegisteredPhoto(matchedStudent?.photo || "");
+      } catch (err) {
+        console.log("Photo preview fetch error:", err);
+        setRegisteredPhoto("");
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [username]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -393,6 +543,22 @@ export default function Login() {
 
           {error && <div className="login-error">⚠ {error}</div>}
 
+          {registeredPhoto && (
+            <div className="registered-photo-box">
+              <img
+                src={registeredPhoto}
+                alt="Registered Student"
+                className="registered-photo-thumb"
+                onClick={() => setShowPhotoModal(true)}
+                title="Click to view bigger photo"
+              />
+              <div className="registered-photo-text">
+                Registered photo found.<br />
+                <span>Click photo to view bigger</span>
+              </div>
+            </div>
+          )}
+
           <form onSubmit={handleLogin}>
             <div className="login-field">
               <label className="login-label">Username</label>
@@ -408,14 +574,25 @@ export default function Login() {
 
             <div className="login-field">
               <label className="login-label">Password</label>
-              <input
-                className="login-input"
-                type="password"
-                placeholder="Enter your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
+              <div className="password-wrap">
+                <input
+                  className="login-input"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Enter your password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+                <button
+                  type="button"
+                  className="password-toggle"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  title={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? "🙈" : "👁️"}
+                </button>
+              </div>
             </div>
 
             <button className="login-btn" type="submit" disabled={loading}>
@@ -439,6 +616,22 @@ export default function Login() {
 </div>
 
         </div>
+
+        {showPhotoModal && registeredPhoto && (
+          <div className="photo-modal-backdrop" onClick={() => setShowPhotoModal(false)}>
+            <div className="photo-modal" onClick={(e) => e.stopPropagation()}>
+              <div className="photo-modal-title">Registered Student Photo</div>
+              <img src={registeredPhoto} alt="Registered Student Large" />
+              <button
+                type="button"
+                className="photo-modal-close"
+                onClick={() => setShowPhotoModal(false)}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );
