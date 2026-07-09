@@ -435,9 +435,23 @@ export default function Login() {
 
   const navigate = useNavigate();
 
+  const getStudentPhoto = (student) => {
+    const photo = student?.photo || student?.student_photo || student?.image || student?.profile_photo || "";
+
+    if (!photo || typeof photo !== "string") return "";
+
+    // If photo is already saved as full base64 image URL from webcam, use it directly.
+    if (photo.startsWith("data:image")) return photo;
+
+    // If backend returns only base64 text, convert it into an image URL.
+    if (photo.length > 100) return `data:image/jpeg;base64,${photo}`;
+
+    return photo;
+  };
+
   // Shows only the already registered photo. Student cannot upload or change it here.
   useEffect(() => {
-    const searchValue = username.trim();
+    const searchValue = String(username || "").trim();
 
     if (searchValue.length < 2) {
       setRegisteredPhoto("");
@@ -447,17 +461,29 @@ export default function Login() {
     const timer = setTimeout(async () => {
       try {
         const res = await axios.get(`${API_BASE_URL}/students`);
-        const students = Array.isArray(res.data) ? res.data : [];
+
+        // Supports both backend formats:
+        // 1) [students]
+        // 2) { success: true, students: [...] }
+        const students = Array.isArray(res.data)
+          ? res.data
+          : Array.isArray(res.data?.students)
+          ? res.data.students
+          : Array.isArray(res.data?.data)
+          ? res.data.data
+          : [];
+
+        const typedValue = searchValue.toLowerCase();
 
         const matchedStudent = students.find((student) => {
-          const savedUsername = String(student.username || "").toLowerCase();
-          const savedPhone = String(student.phone || "").toLowerCase();
-          const typedValue = searchValue.toLowerCase();
+          const savedUsername = String(student?.username || "").toLowerCase();
+          const savedPhone = String(student?.phone || "").toLowerCase();
+          const savedEmail = String(student?.email || "").toLowerCase();
 
-          return savedUsername === typedValue || savedPhone === typedValue;
+          return savedUsername === typedValue || savedPhone === typedValue || savedEmail === typedValue;
         });
 
-        setRegisteredPhoto(matchedStudent?.photo || "");
+        setRegisteredPhoto(getStudentPhoto(matchedStudent));
       } catch (err) {
         console.log("Photo preview fetch error:", err);
         setRegisteredPhoto("");
