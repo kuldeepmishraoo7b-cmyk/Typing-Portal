@@ -290,6 +290,44 @@ app.post("/register-student", async (req, res) => {
   }
 });
 
+
+// Get only the already registered student photo for login preview.
+// This does NOT allow students to upload or change a photo.
+app.get("/api/student-photo/:search", (req, res) => {
+  const search = String(req.params.search || "").trim();
+
+  if (search.length < 2) {
+    return res.json({ success: false, message: "Enter username, phone or email" });
+  }
+
+  db.query(
+    "SELECT id, username, phone, email, photo FROM students WHERE username = ? OR phone = ? OR email = ? LIMIT 1",
+    [search, search, search],
+    (err, result) => {
+      if (err) {
+        console.error("Student photo fetch error:", err);
+        return res.status(500).json({ success: false, message: "Database error" });
+      }
+
+      if (!result.length) {
+        return res.json({ success: false, message: "Student photo not found" });
+      }
+
+      const student = result[0];
+      return res.json({
+        success: true,
+        student: {
+          id: student.id,
+          username: student.username,
+          phone: student.phone,
+          email: student.email,
+          photo: student.photo
+        }
+      });
+    }
+  );
+});
+
 app.post("/student-login", async (req, res) => {
   const { username, password } = req.body;
 

@@ -460,30 +460,13 @@ export default function Login() {
 
     const timer = setTimeout(async () => {
       try {
-        const res = await axios.get(`${API_BASE_URL}/students`);
+        const res = await axios.get(`${API_BASE_URL}/api/student-photo/${encodeURIComponent(searchValue)}`);
 
-        // Supports both backend formats:
-        // 1) [students]
-        // 2) { success: true, students: [...] }
-        const students = Array.isArray(res.data)
-          ? res.data
-          : Array.isArray(res.data?.students)
-          ? res.data.students
-          : Array.isArray(res.data?.data)
-          ? res.data.data
-          : [];
-
-        const typedValue = searchValue.toLowerCase();
-
-        const matchedStudent = students.find((student) => {
-          const savedUsername = String(student?.username || "").toLowerCase();
-          const savedPhone = String(student?.phone || "").toLowerCase();
-          const savedEmail = String(student?.email || "").toLowerCase();
-
-          return savedUsername === typedValue || savedPhone === typedValue || savedEmail === typedValue;
-        });
-
-        setRegisteredPhoto(getStudentPhoto(matchedStudent));
+        if (res.data?.success && res.data?.student) {
+          setRegisteredPhoto(getStudentPhoto(res.data.student));
+        } else {
+          setRegisteredPhoto("");
+        }
       } catch (err) {
         console.log("Photo preview fetch error:", err);
         setRegisteredPhoto("");

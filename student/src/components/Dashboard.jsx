@@ -124,6 +124,96 @@ const styles = `
     font-family: 'JetBrains Mono', monospace;
     letter-spacing: 0.3px;
   }
+
+  /* ── STUDENT PHOTO ── */
+  .sd-profile-photo-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 18px;
+    padding: 12px;
+    border-radius: 14px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  .sd-profile-photo {
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(56,189,248,0.8);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: transform 0.18s, box-shadow 0.18s;
+  }
+  .sd-profile-photo:hover {
+    transform: scale(1.06);
+    box-shadow: 0 0 18px rgba(56,189,248,0.42);
+  }
+  .sd-profile-photo-text {
+    color: #94a3b8;
+    font-size: 0.76rem;
+    line-height: 1.35;
+  }
+  .sd-profile-photo-text b {
+    color: #e2e8f0;
+    display: block;
+    font-size: 0.82rem;
+  }
+  .sd-welcome-photo {
+    width: 68px;
+    height: 68px;
+    border-radius: 18px;
+    object-fit: cover;
+    border: 2px solid rgba(56,189,248,0.6);
+    cursor: pointer;
+    flex-shrink: 0;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+  }
+  .sd-photo-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(2,6,23,0.82);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .sd-photo-modal {
+    width: min(430px, 94vw);
+    background: #0f172a;
+    border: 1px solid rgba(56,189,248,0.28);
+    border-radius: 20px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.65);
+  }
+  .sd-photo-modal-title {
+    color: #f8fafc;
+    font-weight: 800;
+    margin-bottom: 14px;
+  }
+  .sd-photo-modal img {
+    width: 100%;
+    max-height: 430px;
+    object-fit: contain;
+    border-radius: 16px;
+    background: #020617;
+  }
+  .sd-photo-modal-close {
+    width: 100%;
+    margin-top: 14px;
+    padding: 11px;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #38bdf8, #6366f1);
+    color: white;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+
   /* ── MAIN CONTENT ── */
   .sd-main {
     margin-left: 260px;
@@ -457,6 +547,18 @@ export default function Dashboard() {
   const [isFirstLogin, setIsFirstLogin] = useState(false);
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
+  const [studentPhoto, setStudentPhoto] = useState("");
+  const [showPhotoModal, setShowPhotoModal] = useState(false);
+
+  const getStudentPhoto = (student) => {
+    const photo = student?.photo || student?.student_photo || student?.image || student?.profile_photo || "";
+
+    if (!photo || typeof photo !== "string") return "";
+    if (photo.startsWith("data:image")) return photo;
+    if (photo.length > 100) return `data:image/jpeg;base64,${photo}`;
+    return photo;
+  };
+
   useEffect(() => {
     const studentData = sessionStorage.getItem("studentData");
     if (!studentData) {
@@ -479,6 +581,7 @@ export default function Dashboard() {
     const data = JSON.parse(sessionStorage.getItem("studentData") || localStorage.getItem("studentData"));
     if (data && data.username) {
       setUsername(data.username);
+      setStudentPhoto(getStudentPhoto(data));
       const loginKey = `hasLoggedInBefore_${data.id}`;
       const hasLoggedInBefore = localStorage.getItem(loginKey);
       if (!hasLoggedInBefore) {
@@ -563,7 +666,17 @@ export default function Dashboard() {
           <div>
             <div className="sd-welcome">
               <div className="sd-welcome-top">
-                <div className="sd-welcome-icon"><FaKeyboard /></div>
+                {studentPhoto ? (
+                  <img
+                    src={studentPhoto}
+                    alt="Registered Student"
+                    className="sd-welcome-photo"
+                    onClick={() => setShowPhotoModal(true)}
+                    title="Click to view bigger photo"
+                  />
+                ) : (
+                  <div className="sd-welcome-icon"><FaKeyboard /></div>
+                )}
                 <div>
                   <h4>
                     {isFirstLogin
@@ -664,6 +777,21 @@ export default function Dashboard() {
           <div className="sd-sidebar-brand">
             <h4><span className="sd-brand-dot" /> Student Panel</h4>
             <p>Logged in as <b>{username}</b></p>
+            {studentPhoto && (
+              <div className="sd-profile-photo-wrap">
+                <img
+                  src={studentPhoto}
+                  alt="Registered Student"
+                  className="sd-profile-photo"
+                  onClick={() => setShowPhotoModal(true)}
+                  title="Click to view bigger photo"
+                />
+                <div className="sd-profile-photo-text">
+                  <b>Registered Photo</b>
+                  Click to view bigger
+                </div>
+              </div>
+            )}
           </div>
           <nav className="sd-nav">
             {menuItems.map(item => (
@@ -682,6 +810,21 @@ export default function Dashboard() {
         <div className="sd-main">
           {renderContent()}
         </div>
+        {showPhotoModal && studentPhoto && (
+          <div className="sd-photo-modal-backdrop" onClick={() => setShowPhotoModal(false)}>
+            <div className="sd-photo-modal" onClick={(e) => e.stopPropagation()}>
+              <div className="sd-photo-modal-title">Registered Student Photo</div>
+              <img src={studentPhoto} alt="Registered Student Large" />
+              <button
+                type="button"
+                className="sd-photo-modal-close"
+                onClick={() => setShowPhotoModal(false)}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );
