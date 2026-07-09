@@ -52,17 +52,43 @@ const INSCRIPT_MAP = {
   "/": "य",  "?": "?"
 };
 
-// Fix Hindi text if backend/database returns UTF-8 as broken latin text like "à¤¤"
+// Fix Hindi text if backend/database returns UTF-8 as broken Windows-1252/Latin text like "à¤š".
+// This happens when UTF-8 Hindi bytes are read once with the wrong charset.
 function fixHindiEncoding(text) {
   if (!text || typeof text !== "string") return text || "";
-  if (!/[àÂÃ]/.test(text)) return text;
+
+  // If it already contains real Devanagari and no mojibake markers, keep it.
+  if (/[ऀ-ॿ]/.test(text) && !/[àÂÃâ€š]/.test(text)) return text;
+
+  // Common Windows-1252 characters created from UTF-8 bytes 0x80-0x9F.
+  const win1252Reverse = {
+    "€":0x80,"‚":0x82,"ƒ":0x83,"„":0x84,"…":0x85,"†":0x86,"‡":0x87,"ˆ":0x88,"‰":0x89,"Š":0x8A,"‹":0x8B,"Œ":0x8C,"Ž":0x8E,
+    "‘":0x91,"’":0x92,"“":0x93,"”":0x94,"•":0x95,"–":0x96,"—":0x97,"˜":0x98,"™":0x99,"š":0x9A,"›":0x9B,"œ":0x9C,"ž":0x9E,"Ÿ":0x9F
+  };
+
   try {
-    const bytes = Array.from(text, ch => ch.charCodeAt(0));
-    const binary = bytes.map(b => String.fromCharCode(b)).join("");
-    return decodeURIComponent(escape(binary));
+    const bytes = [];
+    for (const ch of text) {
+      const code = ch.charCodeAt(0);
+      if (win1252Reverse[ch] !== undefined) bytes.push(win1252Reverse[ch]);
+      else if (code <= 0xFF) bytes.push(code);
+      else {
+        // Non-mojibake unicode char; keep original if conversion is unsafe.
+        return text;
+      }
+    }
+
+    const decoded = new TextDecoder("utf-8").decode(new Uint8Array(bytes));
+
+    // Use decoded only when it actually produced Hindi and reduced mojibake.
+    if (/[ऀ-ॿ]/.test(decoded) && !/[àÂÃ]/.test(decoded)) {
+      return decoded;
+    }
   } catch (e) {
-    return text;
+    // fallback below
   }
+
+  return text;
 }
 
 function normalizePracticeText(text, lang) {
