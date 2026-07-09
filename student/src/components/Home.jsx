@@ -145,52 +145,6 @@ export default function Home() {
             </span>
           ))}
 
-
-          <div
-  style={{
-    background: "linear-gradient(135deg,#1e3c72,#2a5298)",
-    color: "#fff",
-    padding: "50px",
-    borderRadius: "15px",
-    textAlign: "center",
-    marginTop: "60px"
-  }}
->
-  <h2>Download Typing Portal for Windows</h2>
-
-  <p style={{ maxWidth: "700px", margin: "20px auto", fontSize: "18px" }}>
-    Prefer using a desktop application? Download the official
-    <strong> Typing Portal for Windows</strong> and enjoy a faster,
-    smoother typing experience with all the features of our online portal.
-  </p>
-
-  <ul style={{ listStyle: "none", padding: 0, fontSize: "17px", lineHeight: "2" }}>
-    <li>✅ English & Hindi Typing Practice</li>
-    <li>✅ Online Typing Examinations</li>
-    <li>✅ Real-time WPM & Accuracy</li>
-    <li>✅ Secure Student Login</li>
-    <li>✅ Easy Installation</li>
-  </ul>
-
-  <a
-    href="/Typing/Typing%20Student%20Setup%201.0.0.exe"
-    download
-    className="btn btn-warning btn-lg mt-4"
-    style={{
-      fontWeight: "bold",
-      borderRadius: "30px",
-      padding: "12px 35px"
-    }}
-  >
-    ⬇ Download for Windows
-  </a>
-
-  <p style={{ marginTop: "15px", fontSize: "14px", opacity: "0.9" }}>
-    Compatible with Windows 10 and Windows 11
-  </p>
-</div>
-
-
         </div>
         <div style={styles.heroContent}>
           <div style={styles.heroBadge}>🎓 Student Typing Portal</div>
@@ -330,13 +284,24 @@ export default function Home() {
       <section style={styles.ctaBanner}>
         <div style={styles.ctaBannerBg} />
         <div style={styles.ctaBannerContent}>
-          <h2 style={styles.ctaBannerTitle}>Ready to sharpen your typing?</h2>
+          <h2 style={styles.ctaBannerTitle}>Ready to start your typing journey?</h2>
           <p style={styles.ctaBannerSub}>
-            Join your batch, practice every day, and ace your typing exam.
+            Practice English and Hindi typing online or download the official Windows application for a faster and smoother experience.
           </p>
-          <Link to="/login" style={styles.ctaPrimary}>
-            Login to Student Panel →
-          </Link>
+          <div style={styles.ctaButtonGroup}>
+            <Link to="/login" style={styles.ctaPrimary}>
+              Login to Student Panel →
+            </Link>
+
+            <a
+              href="https://github.com/kuldeepmishraoo7b-cmyk/Typing-Portal/releases/download/v1.0.0/Typing.Student.Setup.1.0.0.exe"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={styles.downloadBtn}
+            >
+              ⬇ Download for Windows
+            </a>
+          </div>
         </div>
       </section>
       <footer style={styles.footer}>
@@ -808,6 +773,27 @@ const styles = {
     letterSpacing: "-0.5px",
   },
   ctaBannerSub: { fontSize: 15, color: "#64748b", marginBottom: 32, lineHeight: 1.6 },
+  ctaButtonGroup: {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 16,
+    flexWrap: "wrap",
+  },
+  downloadBtn: {
+    background: "linear-gradient(135deg, #f59e0b 0%, #f97316 100%)",
+    color: "#fff",
+    textDecoration: "none",
+    padding: "13px 28px",
+    borderRadius: 10,
+    fontWeight: 700,
+    fontSize: 15,
+    fontFamily: "'Syne', sans-serif",
+    letterSpacing: "0.2px",
+    display: "inline-block",
+    boxShadow: "0 8px 25px rgba(245,158,11,.35)",
+    transition: "transform 0.2s, opacity 0.2s",
+  },
   footer: {
     borderTop: "1px solid rgba(255,255,255,0.06)",
     padding: "32px",
