@@ -1,6 +1,8 @@
 const { app, BrowserWindow } = require("electron");
 const path = require("path");
 
+app.setAppUserModelId("com.kuldeep.typingstudent");
+
 function createWindow() {
   const win = new BrowserWindow({
     width: 1400,

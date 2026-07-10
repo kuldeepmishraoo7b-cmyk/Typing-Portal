@@ -1,6 +1,6 @@
 {
   "name": "typing-student",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Typing Student Desktop Application",
   "main": "main.js",
   "author": "Kuldeep",
@@ -22,7 +22,9 @@
     },
     "files": [
       "main.js",
-      "package.json"
+      "package.json",
+      "assets/**/*",
+      "afterPack.js"
     ],
     "extraResources": [
       {
