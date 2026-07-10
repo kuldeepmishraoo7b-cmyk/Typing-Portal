@@ -294,7 +294,7 @@ export default function Home() {
             </Link>
 
             <a
-              href="https://github.com/kuldeepmishraoo7b-cmyk/Typing-Portal/releases/download/v1.1.0/Typing.Student.Setup.1.1.0.exe"
+              href="https://github.com/kuldeepmishraoo7b-cmyk/Typing-Portal/releases/download/v1.0.1/Typing.Student.Setup.1.0.1.exe"
               target="_blank"
               rel="noopener noreferrer"
               style={styles.downloadBtn}
