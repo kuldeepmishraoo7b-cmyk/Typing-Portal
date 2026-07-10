@@ -7,6 +7,7 @@ function createWindow() {
     height: 900,
     autoHideMenuBar: true,
     title: "Typing Portal",
+    icon: path.join(__dirname, "assets", "TypingPortal.ico"),
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,

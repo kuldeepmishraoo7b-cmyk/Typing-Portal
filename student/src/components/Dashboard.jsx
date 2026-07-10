@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import {
@@ -537,6 +537,47 @@ const styles = `
     background: #fef2f2;
     border-color: #ef4444;
   }
+  .sd-reply-notification {
+    position: fixed;
+    top: 22px;
+    right: 22px;
+    z-index: 9999;
+    width: min(390px, calc(100vw - 36px));
+    background: #ffffff;
+    border: 1px solid #bfdbfe;
+    border-left: 5px solid #2563eb;
+    border-radius: 14px;
+    box-shadow: 0 18px 45px rgba(15, 23, 42, 0.22);
+    padding: 15px 44px 15px 16px;
+    animation: sdSlideIn 0.25s ease-out;
+  }
+  .sd-reply-notification strong {
+    display: block;
+    color: #0f172a;
+    font-size: 0.92rem;
+    margin-bottom: 5px;
+  }
+  .sd-reply-notification p {
+    margin: 0;
+    color: #475569;
+    font-size: 0.84rem;
+    line-height: 1.45;
+    word-break: break-word;
+  }
+  .sd-reply-notification button {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    border: 0;
+    background: transparent;
+    color: #64748b;
+    font-size: 1.25rem;
+    cursor: pointer;
+  }
+  @keyframes sdSlideIn {
+    from { opacity: 0; transform: translateY(-12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
 `;
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -549,6 +590,10 @@ export default function Dashboard() {
   const [messages, setMessages] = useState([]);
   const [studentPhoto, setStudentPhoto] = useState("");
   const [showPhotoModal, setShowPhotoModal] = useState(false);
+  const [replyNotification, setReplyNotification] = useState(null);
+  const previousRepliesRef = useRef(new Map());
+  const messagesLoadedRef = useRef(false);
+  const notificationTimerRef = useRef(null);
 
   const getStudentPhoto = (student) => {
     const photo = student?.photo || student?.student_photo || student?.image || student?.profile_photo || "";
@@ -594,13 +639,82 @@ export default function Dashboard() {
   }, [activeMenu]);
   useEffect(() => {
     fetchStudentMessages();
+
+    // Keep checking while the application is open so admin replies appear
+    // without closing or restarting the Student application.
+    const messagePoller = window.setInterval(fetchStudentMessages, 5000);
+
+    return () => {
+      window.clearInterval(messagePoller);
+      if (notificationTimerRef.current) {
+        window.clearTimeout(notificationTimerRef.current);
+      }
+    };
   }, []);
+
+  const showNewReplyNotification = (msg) => {
+    setReplyNotification({
+      id: msg.id,
+      text: msg.reply,
+    });
+
+    if (notificationTimerRef.current) {
+      window.clearTimeout(notificationTimerRef.current);
+    }
+    notificationTimerRef.current = window.setTimeout(() => {
+      setReplyNotification(null);
+    }, 8000);
+
+    // Also show a native desktop notification when Electron/browser permits it.
+    if ("Notification" in window) {
+      const sendNativeNotification = () => {
+        try {
+          new Notification("New reply from admin", {
+            body: msg.reply,
+            icon: "/student.png",
+          });
+        } catch (error) {
+          console.warn("Desktop notification unavailable:", error);
+        }
+      };
+
+      if (Notification.permission === "granted") {
+        sendNativeNotification();
+      } else if (Notification.permission === "default") {
+        Notification.requestPermission().then((permission) => {
+          if (permission === "granted") sendNativeNotification();
+        });
+      }
+    }
+  };
+
   const fetchStudentMessages = async () => {
     const student = JSON.parse(sessionStorage.getItem("studentData") || localStorage.getItem("studentData"));
     if (!student) return;
     try {
-      const res = await axios.get(`https://typing-portal-es53.onrender.com/api/student-messages/${student.id}`);
-      setMessages(res.data);
+      const res = await axios.get(
+        `https://typing-portal-es53.onrender.com/api/student-messages/${student.id}`,
+        { params: { _t: Date.now() } }
+      );
+      const latestMessages = Array.isArray(res.data) ? res.data : [];
+
+      if (messagesLoadedRef.current) {
+        const newlyRepliedMessage = latestMessages.find((msg) => {
+          const previousReply = previousRepliesRef.current.get(msg.id) || "";
+          const currentReply = (msg.reply || "").trim();
+          return currentReply && currentReply !== previousReply;
+        });
+
+        if (newlyRepliedMessage) {
+          showNewReplyNotification(newlyRepliedMessage);
+        }
+      }
+
+      previousRepliesRef.current = new Map(
+        latestMessages.map((msg) => [msg.id, (msg.reply || "").trim()])
+      );
+      messagesLoadedRef.current = true;
+      setMessages(latestMessages);
     } catch (err) {
       console.error("Failed to fetch messages:", err);
     }
@@ -772,6 +886,19 @@ export default function Dashboard() {
   return (
     <>
       <style>{styles}</style>
+      {replyNotification && (
+        <div className="sd-reply-notification" role="alert">
+          <strong>New reply from admin</strong>
+          <p>{replyNotification.text}</p>
+          <button
+            type="button"
+            aria-label="Close notification"
+            onClick={() => setReplyNotification(null)}
+          >
+            ×
+          </button>
+        </div>
+      )}
       <div className="sd-root">
         <div className="sd-sidebar">
           <div className="sd-sidebar-brand">

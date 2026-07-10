@@ -31,7 +31,8 @@
       }
     ],
     "win": {
-      "target": "nsis"
+      "target": "nsis",
+      "icon": "assets/TypingPortal.ico"
     },
     "nsis": {
       "oneClick": false,
